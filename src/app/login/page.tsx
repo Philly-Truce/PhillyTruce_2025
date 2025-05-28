@@ -2,6 +2,7 @@
 import React, { useState, ChangeEvent, useEffect } from "react";
 import Link from "next/link";
 import Loading from "@/components/loading/page";
+import { signIn } from "next-auth/react";
 
 export default function Main() {
  
@@ -122,28 +123,50 @@ export default function Main() {
               </div>
             )}
           </section>
-          <Link
-            href={mobileOption ? "/home" : "/login-otp-email"}
-            className="w-full inline-flex pl-1"
-          >
-            <button
-              className={`my-8 px-6 py-3 rounded-3xl text-sm font-medium w-full ${
-                mobileOption
-                  ? mobileContinueDisabled
-                    ? "bg-accent text-primary text-opacity-40"
-                    : "bg-primary text-white"
-                  : emailContinueDisabled
+          
+          <button
+            className={`my-8 px-6 py-3 rounded-3xl text-sm font-medium w-full ${
+              mobileOption
+                ? mobileContinueDisabled
                   ? "bg-accent text-primary text-opacity-40"
                   : "bg-primary text-white"
-              }`}
-              type="button"
-              disabled={
-                mobileOption ? mobileContinueDisabled : emailContinueDisabled
+                : emailContinueDisabled
+                ? "bg-accent text-primary text-opacity-40"
+                : "bg-primary text-white"
+            }`}
+            type="button"
+            disabled={
+              mobileOption ? mobileContinueDisabled : emailContinueDisabled
+            }
+            onClick={async () => {
+              if (mobileOption) {
+                const result = await signIn("credentials", {
+                  redirect: false, 
+                  identifier: mobileInputValue,
+                  password: "", 
+                });
+                if (result?.error) {
+                  alert("Login failed: " + result.error);
+                } else {
+                  window.location.href = "/home";
+                }
+              } else {
+                const result = await signIn("credentials", {
+                  redirect: false,
+                  identifier: emailInputValue,
+                  password: passwordInputValue,
+                });
+                if (result?.error) {
+                  alert("Login failed: " + result.error);
+                } else {
+                  window.location.href = "/home";
+                }
               }
-            >
-              LOG IN
-            </button>
-          </Link>
+            }}
+          >
+            LOG IN
+          </button>
+          
           <section className="flex flex-col gap-3">
             <a href="#" className="text-sm underline text-link font-normal">
               Need help logging in?

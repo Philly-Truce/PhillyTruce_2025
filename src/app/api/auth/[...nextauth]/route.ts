@@ -1,7 +1,8 @@
-import NextAuth, { AuthOptions, DefaultSession } from "next-auth";
+import { AuthOptions, DefaultSession } from "next-auth";
+import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials";
-import User from "../../../db/mongoDB/user-schema";
-import dbConnect from "../../../db/mongoDB/db-connect";
+import User from "../../../../db/mongoDB/user-schema";
+import dbConnect from "../../../../db/mongoDB/db-connect";
 
 declare module "next-auth" {
   interface Session {
@@ -25,7 +26,7 @@ const authOptions: AuthOptions = {
           return null;
         }
 
-        //try {
+        try {
           console.log("Connecting to DB...");
           await dbConnect();
           console.log("DB Connected!");
@@ -55,10 +56,10 @@ const authOptions: AuthOptions = {
             email: user.email,
             phoneNumber: user.phoneNumber,
           };
-        //} catch (error) {
-        //  console.error("DB Connection failed:", error);
-        //  return null;
-        //}
+        } catch (error) {
+          console.error("DB Connection failed:", error);
+          return null;
+        }
       },
     }),
   ],
@@ -122,4 +123,5 @@ const authOptions: AuthOptions = {
   },
 };
 
-export default NextAuth(authOptions);
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };

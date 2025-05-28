@@ -2,6 +2,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from 'next/image';
+import { useSession } from "next-auth/react";
+
 const pageTitles = {
     "/reports": "Reports",
     "/reports-view": "Report",
@@ -13,6 +15,7 @@ const pageTitles = {
     "/resources": "Resources",
     "/settings": "Settings",
 };
+
 const LeftArrow = () => (<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M20 11H7.83L13.42 5.41L12 4L4 12L12 20L13.41 18.59L7.83 13H20V11Z" fill="white"/>
   </svg>);
@@ -28,7 +31,7 @@ export default function TopBanner() {
             const lastFourChars = pathname.slice(-4);
             return `Message #${lastFourChars}`;
         }
-        return pageTitles[pathname] || "Welcome Alyssa!";
+        return pageTitles[pathname] || `Welcome ${session?.user?.name || "User"}!`;
     };
     /**
      * Renders different icons depending on the pathname
