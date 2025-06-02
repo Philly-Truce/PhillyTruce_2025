@@ -30,21 +30,21 @@ export default function ClientLayout({
   }, [pathname]);
 
   return (
-    <div id="client-layout" className="flex flex-col max-h-screen h-screen">
-      <TopBanner />
-      <main
-        id="client-layout-inner1"
-        className="flex-grow flex flex-col overflow-scroll"
-        ref={containerRef}
-      >
-        <div
-          id="client-layout-inner2"
-          className="flex-grow flex justify-start px-4"
+      <div id="client-layout" className="flex flex-col max-h-screen h-screen">
+        <TopBanner />
+        <main
+          id="client-layout-inner1"
+          className="flex-grow flex flex-col overflow-scroll"
+          ref={containerRef}
         >
-          {children}
-        </div>
-      </main>
-      <Menu hasOverflow={hasOverflow} />{" "}
-    </div>
+          <div
+            id="client-layout-inner2"
+            className="flex-grow flex justify-start px-4"
+          >
+            {children}
+          </div>
+        </main>
+        <Menu hasOverflow={hasOverflow} />{" "}
+      </div>
   );
 }

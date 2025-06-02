@@ -1,17 +1,10 @@
-import NextAuth, { AuthOptions, DefaultSession } from "next-auth";
+import { AuthOptions, DefaultSession } from "next-auth";
+import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials";
-import User from "../../../db/mongoDB/user-schema";
-import dbConnect from "../../../db/mongoDB/db-connect";
+import User from "../../../../db/mongoDB/user-schema";
+import dbConnect from "../../../../db/mongoDB/db-connect";
 
-declare module "next-auth" {
-  interface Session {
-    user: {
-      id: string;
-    } & DefaultSession["user"];
-  }
-}
-
-const authOptions: AuthOptions = {
+export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -25,7 +18,7 @@ const authOptions: AuthOptions = {
           return null;
         }
 
-        //try {
+        try {
           console.log("Connecting to DB...");
           await dbConnect();
           console.log("DB Connected!");
@@ -55,10 +48,10 @@ const authOptions: AuthOptions = {
             email: user.email,
             phoneNumber: user.phoneNumber,
           };
-        //} catch (error) {
-        //  console.error("DB Connection failed:", error);
-        //  return null;
-        //}
+        } catch (error) {
+          console.error("DB Connection failed:", error);
+          return null;
+        }
       },
     }),
   ],
@@ -67,19 +60,33 @@ const authOptions: AuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
-    async session({ session, token }) {
-      return {
-        ...session,
-        user: {
-          ...session.user,
-          id: token.id as string,
-        },
+    async session({ session, token, user }) {
+      console.log("Session callback triggered");
+      console.log("Session before modification:", session);
+      console.log("Token:", token);
+
+      session.user = {
+        id: token.id,
+        name: token.name,
+        email: token.email,
       };
+
+      session.accessToken = token.accessToken
+
+      console.log("Session after modification:", session);
+      return session;
     },
     async jwt({ token, user }) {
+      console.log("JWT callback triggered");
+      console.log("JWT before modification:", token);
+      console.log("User:", user);
+      
       if (user) {
         token.id = user.id;
+        token.accessToken = `Token-${user.id}`;
       }
+
+      console.log("Token after modification:", token);
       return token;
     },
   },
@@ -90,17 +97,6 @@ const authOptions: AuthOptions = {
     error: "/auth/error",
     verifyRequest: "/auth/verify-request",
     newUser: "/auth/new-user",
-  },
-  cookies: {
-    sessionToken: {
-      name: `__Secure-next-auth.session-token`,
-      options: {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        secure: true,
-      },
-    },
   },
   events: {
     async signIn({ user }) {
@@ -116,10 +112,4 @@ const authOptions: AuthOptions = {
       console.log("Account linked to user:", user);
     },
   },
-  jwt: {
-    secret: process.env.JWT_SECRET,
-    maxAge: 60 * 60 * 24 * 30,
-  },
 };
-
-export default NextAuth(authOptions);
