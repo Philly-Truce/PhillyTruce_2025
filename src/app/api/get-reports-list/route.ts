@@ -4,10 +4,10 @@ import { ReportSummaryType } from "@/app/reports/page";
 
 export async function GET(request: NextRequest) {
   const reports = await Report.find({
-    report_stage: true,
-    incident_report_number: true,
-    id: true,
-    report_initiated_at: true,
+    report_stage: 1,
+    incident_report_number: 1,
+    id: 1,
+    report_initiated_at: 1,
   });
 
   const unclaimed = reports.filter(

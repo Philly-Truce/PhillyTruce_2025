@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import Image from 'next/image'
+import { useSession } from "next-auth/react";
 
 const pageTitles: Record<string, string> = {
   "/reports": "Reports",
@@ -45,20 +46,26 @@ const ReportIcon = () => (
   </svg>
 );
 
+function getInitials(name: string): string {
+  if (!name) return '?';
+  const nameParts = name.trim().split(' ');
+  if (nameParts.length === 1) return nameParts[0][0].toUpperCase();
+  return nameParts[0][0].toUpperCase() + nameParts[1][0].toUpperCase();
+}
+
 export default function TopBanner() {
   const pathname = usePathname();
   const query = useSearchParams()
   const params = useParams();
-
+  const { data: session, status } = useSession();
+  
+  const userName = session?.user?.name || 'Unknown User';
+  const initials = getInitials(userName);
 
   if (["/login", "/login-otp", "/more", "/signin","/login-otp-email"].includes(pathname)) return null;
 
   const getPageTitle = () => {
-    if (pathname.startsWith("/messages/")) {
-      const lastFourChars = pathname.slice(-4);
-      return `Message #${lastFourChars}`;
-    }
-    return pageTitles[pathname] || "Welcome Alyssa!";
+    return `Welcome, ${userName}!`;
   };
 
   /**
@@ -93,7 +100,7 @@ export default function TopBanner() {
           id="initials"
           className="absolute text-white text-center text-xs font-bold leading-[100%] tracking-[0.5px] top-1/2 left-1/2 -translate-x-2/4 -translate-y-2/4"
         >
-          AV
+          {initials}
         </div>
       </div>
     );

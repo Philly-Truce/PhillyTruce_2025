@@ -1,6 +1,6 @@
-import { getServerSession } from "next-auth/next";
-import { options } from "@/app/api/auth/[...nextauth]/options";
-import { redirect } from "next/navigation";
+//import { getServerSession } from "next-auth/next";
+//import { options } from "@/app/api/auth/[...nextauth]/options";
+//import { redirect } from "next/navigation";
 //import SessionControl from "@/components/auth/session-control";
 import ListItems from "../../data/list-items.json";
 import Image from "next/image";
