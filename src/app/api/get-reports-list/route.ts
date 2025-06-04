@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Report } from "@/db/mongoDB/report-schema";
 import { ReportSummaryType } from "@/app/reports/page";
+import dbConnect from "@/db/mongoDB/db-connect";
 
 export async function GET(request: NextRequest) {
-  const reports = await Report.find({
-    report_stage: 1,
-    incident_report_number: 1,
-    id: 1,
-    report_initiated_at: 1,
-  });
+  await dbConnect();
+
+  const reports = await Report.find({}).select(
+    "report_stage incident_report_number id report_initiated_at"
+  );
 
   const unclaimed = reports.filter(
     (report: ReportSummaryType) => report.report_stage === "unclaimed"

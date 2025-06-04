@@ -1,6 +1,7 @@
 import ReportList from "@/components/reports/ReportList";
 import SearchBar from "@/components/search-bar";
 import { Report } from "@/db/mongoDB/report-schema";
+import dbConnect from "@/db/mongoDB/db-connect";
 
 export type ReportSummaryType = {
   id: string;
@@ -10,17 +11,21 @@ export type ReportSummaryType = {
 };
 
 const fetchAllReports = async () => {
-  const reports = await Report.find({
-    select: {
-      report_stage: true,
-      incident_report_number: true,
-      id: true,
-      report_initiated_at: true,
-    },
-  });
+  await dbConnect();
 
-  console.log("Fetched reports:", reports);
-  return reports;
+  const reports = await Report.find({}).select(
+    "report_stage incident_report_number id report_initiated_at"
+  );
+
+  const sanitizedReports = reports.map((report) => ({
+    id: report._id.toString(), // Convert ObjectId to string
+    report_stage: report.report_stage,
+    report_initiated_at: report.report_initiated_at.toISOString(), // Convert Date to ISO string
+    incident_report_number: report.incident_report_number,
+  }));
+
+  console.log("Sanitized reports:", sanitizedReports);
+  return sanitizedReports;
 };
 
 export default async function Main() {
