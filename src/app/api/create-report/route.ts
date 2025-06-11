@@ -4,41 +4,72 @@ import dbConnect from "@/db/mongoDB/db-connect";
 
 export async function POST(request: NextRequest) {
   try {
-    await dbConnect();
+    await dbConnect(); // Ensure the database connection is established
 
     const body = await request.json();
 
     // Extract data from the request body
-    const { incident_type, location, date, time, description, ppd_notified } =
-      body;
+    const {
+      incident_type,
+      location,
+      date,
+      time,
+      description,
+      ppd_notified,
+      incident_report_number, // Include this if editing an existing report
+    } = body;
 
-    // Generate a unique report number
-    const reportNumber = await generateUniqueReportNumber();
+    // Validate required fields
+    if (!incident_type || !location || !description) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
 
-    // Create a new user-created report
-    const newReport = await Report.create({
-      data: {
+    let reportNumber = incident_report_number;
+    let reportStage = "unclaimed"; // Default stage for new reports
+    let reportOrigin = "user_created"; // Default origin
+    let reportInitiatedAt = new Date(`${date}T${time}`); // Combine date and time
+
+    if (reportNumber) {
+      // Check if the report already exists
+      const existingReport = await Report.findOne({
         incident_report_number: reportNumber,
-        report_origin: "user_created",
-        report_stage: "claimed",
-        incident_type,
-        description,
-        location,
-        report_last_updated_at: new Date(),
-        ppd_notified,
-        creator_user_id: "66ba6bfd81833a6900354b86",
-        report_initiated_at: new Date(`${date}T${time}`),
-      },
-    });
+      });
 
-    return NextResponse.json(
-      { message: "Report created successfully", report: newReport },
-      { status: 201 }
+      if (existingReport) {
+        // Retain the existing report stage, origin, and initiated date
+        reportStage = existingReport.report_stage;
+        reportOrigin = existingReport.report_origin;
+        reportInitiatedAt = existingReport.report_initiated_at;
+      }
+    } else {
+      // Generate a unique report number for new reports
+      reportNumber = await generateUniqueReportNumber();
+    }
+
+    // Create or update the report
+    const newReport = await Report.findOneAndUpdate(
+      { incident_report_number: reportNumber }, // Match by report number
+      {
+        incident_report_number: reportNumber,
+        report_stage: reportStage, // Retain existing stage if editing
+        report_origin: reportOrigin, // Retain existing origin if editing
+        report_initiated_at: reportInitiatedAt, // Retain existing date if editing
+        incident_type,
+        location,
+        description,
+        ppd_notified: ppd_notified || false,
+      },
+      { upsert: true, new: true } // Create if not exists, return updated document
     );
+
+    return NextResponse.json(newReport, { status: 201 });
   } catch (error) {
-    console.error("Error creating report:", error);
+    console.error("Error creating or updating report:", error);
     return NextResponse.json(
-      { error: "Failed to create report" },
+      { error: "Failed to create or update report" },
       { status: 500 }
     );
   }
@@ -51,21 +82,22 @@ async function generateUniqueReportNumber(): Promise<number> {
   while (!isUnique) {
     try {
       // Try to find a report with this number
-      const existingReport = await Report.find({
+      const existingReport = await Report.findOne({
         incident_report_number: reportNumber,
       });
-      if (existingReport) {
-        throw new Error("Report number already exists");
-      }
 
-      // If we reach here, the report number is unique
-      isUnique = true;
+      if (existingReport) {
+        console.log(
+          `Report number ${reportNumber} already exists, generating a new one.`
+        );
+        reportNumber = Math.floor(1000 + Math.random() * 9000); // Generate a new random number
+      } else {
+        // If no report exists, the number is unique
+        isUnique = true;
+      }
     } catch (error) {
-      // If there's an error, it means the number already exists, so we'll try again
-      console.log(
-        `Report number ${reportNumber} already exists, generating a new one.`
-      );
-      reportNumber = Math.floor(1000 + Math.random() * 9000); // Generate a new random number
+      console.error("Error checking report number uniqueness:", error);
+      throw new Error("Failed to generate a unique report number");
     }
   }
 
