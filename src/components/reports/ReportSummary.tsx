@@ -21,7 +21,10 @@ export const ReportSummary: React.FC<{
           ? "font-normal"
           : "font-bold"
       }`}
-      onClick={(event) => onClick(report.incident_report_number, event)}
+      onClick={(event) =>{
+        console.log("Clicked Report Incident Number:", report.incident_report_number);
+        onClick(report.incident_report_number, event)}
+      } 
     >
       <div className="w-4 h-full flex flex-col items-center justify-center">
         {unreadReports.some(
@@ -40,6 +43,8 @@ export const ReportSummary: React.FC<{
           </p>
         </div>
         {report.incident_report_number ? (
+          <>
+          {console.log("Navigating to Report Incident Number:", report.incident_report_number)}
           <Link href={{ 
             pathname: `/reports/${report.incident_report_number}`, 
           query: { report_stage: report?.report_stage}}}>
@@ -48,6 +53,7 @@ export const ReportSummary: React.FC<{
               <SlArrowRight />
             </button>
           </Link>
+          </>
         ) : (
           <button className="flex gap-5 items-center opacity-50" disabled>
             <p className="font-bold text-sm">No Report Number</p>

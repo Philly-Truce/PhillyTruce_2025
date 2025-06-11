@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Report } from "@/db/mongoDB/report-schema";
+import dbConnect from "@/db/mongoDB/db-connect";
 
 export async function POST(request: NextRequest) {
   try {
+    await dbConnect();
+
     const body = await request.json();
 
     // Extract data from the request body

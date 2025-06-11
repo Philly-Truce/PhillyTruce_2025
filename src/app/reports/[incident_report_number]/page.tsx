@@ -1,7 +1,7 @@
 import React from "react";
 import ReportView from "@/components/report-view";
-import type { Report } from "@/components/report-view";
-import axios from "axios";
+import { Report } from "../../../db/mongoDB/report-schema";
+import dbConnect from "../../../db/mongoDB/db-connect";
 
 /**
  * Fetches a report by incident report number
@@ -13,21 +13,20 @@ export const fetchReportByReportNumber = async (
 ) => {
   console.log("getting report #" + incidentReportNumber);
   console.log(typeof incidentReportNumber);
+  
   try {
-    const report = await axios.get(
-      `${
-        process.env.NEXT_PUBLIC_BASE_URL
-      }/api/get-report?incident_report_number=${Number.parseInt(
-        incidentReportNumber
-      )}`
-    );
+    console.log("Connecting to DB...");
+    await dbConnect();
+    console.log("DB Connected!");
 
-    if (report.status === 404) {
-      throw new Response("Not Found", { status: 404 });
+    const parsedNumber = Number.parseInt(incidentReportNumber);
+
+    const report = await Report.findOne({ incident_report_number: parsedNumber });
+    if (!report) {
+      throw new Error("Report not found");
     }
-    return report.data;
+    return report;
   } catch (error) {
-    // Handle error (e.g., log it or rethrow)
     throw new Error("Error fetching report");
   }
 };
@@ -42,9 +41,8 @@ export default async function ReportsViewPage({
   params: { incident_report_number: string };
 }) {
   // Fetch the report data
-  const fetchedReport = await fetchReportByReportNumber(
-    params.incident_report_number
-  ).catch(() => null);
+  const fetchedReport = await fetchReportByReportNumber(params.incident_report_number).catch(() => null);
+
   if (!fetchedReport) {
     return <div>Report Not Found</div>;
   }
