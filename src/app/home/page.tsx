@@ -1,15 +1,13 @@
-//import { getServerSession } from "next-auth/next";
-//import { options } from "@/app/api/auth/[...nextauth]/options";
-//import { redirect } from "next/navigation";
-//import SessionControl from "@/components/auth/session-control";
-import ListItems from "../../data/list-items.json";
+//import ListItems from "../../data/list-items.json";
 import Image from "next/image";
 import Thumbnail from "./list-thumbnail.png";
-import { GoTriangleRight } from "react-icons/go";
-import "./clock-in";
 import ClockIn from "./clock-in";
+import { useEffect, useState } from "react";
+import dbConnect from "../../db/mongoDB/db-connect";
+import AnnouncementsModel from "../../db/mongoDB/Annoncements";
 
 export default async function Home() {
+  const announcements = await fetchAnnouncementsFromDatabase();
 
   //const session = await SessionControl();
   const date = new Date();
@@ -50,7 +48,7 @@ export default async function Home() {
             See all
           </a>
         </div>
-        {ListItems.map((listItem, index) => (
+        {announcements.map((announcements, index) => (
           <div key={index} className="mb-2 py-2 px-4 bg-homelistbg flex">
             <Image
               src={Thumbnail}
@@ -60,12 +58,30 @@ export default async function Home() {
               className="self-center"
             />
             <div className="pl-4 self-center flex-1">
-              <h6 className="text-sm">{listItem.title}</h6>
-              <p className="text-xs">{listItem.detail}</p>
+              <h6 className="text-sm">{announcements.title}</h6>
+              <p className="text-xs">{announcements.detail}</p>
             </div>
           </div>
         ))}
       </section>
     </div>
   );
+}
+
+async function fetchAnnouncementsFromDatabase() {
+  try {
+    await dbConnect();
+    console.log("Database connected successfully.");
+
+    const announcements = await AnnouncementsModel.find({});
+    console.log("Announcements fetched:", announcements);
+
+    return announcements.map((item) => ({
+      title: item.title,
+      detail: item.detail,
+    }));
+  } catch (error) {
+    console.error("Error fetching list items:", error);
+    return [];
+  }
 }
