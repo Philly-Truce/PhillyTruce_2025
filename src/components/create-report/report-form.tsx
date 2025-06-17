@@ -40,34 +40,36 @@ const ReportForm: React.FC<Report> = ({ report }) => {
     },
   });
   const router = useRouter();
-  const handleCreateForm: SubmitHandler<ReportData> = async (data) => {
+  const handleCreateForm = async (data: any) => {
     try {
-      if (!Array.isArray(data.incident_type)) {
-        data.incident_type = (data.incident_type as string).split(",");
-      }
-      if (report.incident_report_number) {
-        const res: AxiosResponse<Report> = await axios.put<Report>(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/update-report`,
-          data
-        );
-
-        if (res.status === 200) {
-          router.push(`/reports/${res.data.report.incident_report_number}`);
-        }
+      console.log("Submitting form data:", data);
+  
+      // Prepare the payload for the API
+      const payload = {
+        incident_type: data.incident_type,
+        location: data.location,
+        date: data.report_initiated_at
+          ? new Date(data.report_initiated_at).toISOString().split("T")[0]
+          : new Date().toISOString().split("T")[0], // Extract date
+        time: data.report_initiated_at
+          ? new Date(data.report_initiated_at).toISOString().split("T")[1]
+          : new Date().toISOString().split("T")[1], // Extract time
+        description: data.description,
+        ppd_notified: data.ppd_notified || false,
+      };
+  
+      // Make an API call to create a new report
+      const response = await axios.post("/api/create-report", payload);
+  
+      if (response.status === 201) {
+        console.log("Report created successfully:", response.data);
+        // Redirect or show success message
+        window.location.href = "/reports"; // Redirect to the reports page
       } else {
-        const res: AxiosResponse<Report> = await axios.post<Report>(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/create-report`,
-          data
-        );
-
-        if (res.status === 201) {
-          router.push(`/reports/${res.data.report.incident_report_number}`);
-        }
+        console.error("Failed to create report:", response.data);
       }
-
-      methods.reset();
     } catch (error) {
-      console.error("There was an error making the request:", error);
+      console.error("Error creating report:", error);
     }
   };
 
