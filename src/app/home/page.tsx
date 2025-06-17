@@ -59,11 +59,10 @@ export default async function Home() {
               alt="List item thumbnail"
               className="self-center"
             />
-            <div className="pl-4 self-center w-52">
+            <div className="pl-4 self-center flex-1">
               <h6 className="text-sm">{listItem.title}</h6>
               <p className="text-xs">{listItem.detail}</p>
             </div>
-            <GoTriangleRight className="ml-auto self-center text-lg text-primary" />
           </div>
         ))}
       </section>
