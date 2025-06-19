@@ -148,7 +148,7 @@ export default function Main() {
                 if (result?.error) {
                   alert("Login failed: " + result.error);
                 } else {
-                  window.location.href = "/home";
+                  window.location.href = "/login-otp-email";
                 }
               } else {
                 const result = await signIn("credentials", {
@@ -159,7 +159,7 @@ export default function Main() {
                 if (result?.error) {
                   alert("Login failed: " + result.error);
                 } else {
-                  window.location.href = "/home";
+                  window.location.href = "/login-otp-email";
                 }
               }
             }}
