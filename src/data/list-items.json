@@ -1,10 +1,18 @@
 [
-    {
-        "title": "List item",
-        "detail": "Ad duis tempor tempor ipsum sit ut."
+{
+        "title": "HEAT ADVISORY",
+        "detail": "THE NATIONAL WEATHER SERVICE IN PHILADELPHIA COUNTY HAS ISSUED AN EXCESSIVE HEAT WARNING...WHICH IS IN EFFECT FROM 11 AM SATURDAY TO 8 PM EDT SUNDAY."
     },
     {
-        "title": "List item",
-        "detail": "Ex nostrud aliqua eiusmod aute aliquip do voluptate do commodo irure ad."
+        "title": "Closures",
+        "detail": "All Philadelphia schools will be closed from 12/24/24-01/09/25"
+    },
+    {
+        "title": "Construction",
+        "detail": "Street construction between 1st and Washington Ave. may cause bus route disruptions."
+    },
+    {
+        "title": "Local event",
+        "detail": "Block party on State St. between 7th Ave. and 8th Ave. Street will be closed to traffic 2PM-8PM."
     }
 ]
